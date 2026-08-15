@@ -1,0 +1,391 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		543175CED90546D4A9320085 /* MediaRenamerApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AB26F183D4DC4581A48B30B1 /* MediaRenamerApp.swift */; };
+		2A5F1E51FA224551B8B0AEAF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4C8625AD15674820800A4254 /* ContentView.swift */; };
+		DC9C16F18467483EB41C4C63 /* MediaItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0AB05A09DB32416682DD1A39 /* MediaItem.swift */; };
+		1CD6C93F73C44FF490F7706A /* TMDbModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD31AC84F9414C099F46D0C7 /* TMDbModels.swift */; };
+		B49FDF77D1BA410EB4E72399 /* LibraryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 5486660485BE476185976525 /* LibraryModel.swift */; };
+		22142F28BC864CB78F0D87CF /* FilenameParser.swift in Sources */ = {isa = PBXBuildFile; fileRef = 20A7FCF5C40D4D17B486C5CD /* FilenameParser.swift */; };
+		9145F701B8FA45CF97778436 /* TMDbClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = F98160277AA241B599163275 /* TMDbClient.swift */; };
+		7C1C7030E0E74BAFA0AB197B /* RenameEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = 088A4C0AC18A451F8A5A6679 /* RenameEngine.swift */; };
+		28593B0F05EF44AAB1EF4D56 /* DropZoneView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 77942C95202F4CF9930E729D /* DropZoneView.swift */; };
+		E31A0FE3565D48F6ADBEC1B8 /* FileRowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A93416BFD7A64F8985D8A69F /* FileRowView.swift */; };
+		3FD885342AF747B3ADD4F71E /* MatchPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ECE46DC08C46E08C499527 /* MatchPickerSheet.swift */; };
+		6ECA8B9199174522849B3550 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8EAFF4B1F4243259BA7E28F /* SettingsView.swift */; };
+		C17E94A2A5774BFA81116354 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23F3C19D6FC04E1896B5540E /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		AF9845E9168D481C9BF5F973 /* MediaRenamer.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = MediaRenamer.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AB26F183D4DC4581A48B30B1 /* MediaRenamerApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaRenamerApp.swift; sourceTree = "<group>"; };
+		4C8625AD15674820800A4254 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		0AB05A09DB32416682DD1A39 /* MediaItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaItem.swift; sourceTree = "<group>"; };
+		CD31AC84F9414C099F46D0C7 /* TMDbModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDbModels.swift; sourceTree = "<group>"; };
+		5486660485BE476185976525 /* LibraryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibraryModel.swift; sourceTree = "<group>"; };
+		20A7FCF5C40D4D17B486C5CD /* FilenameParser.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilenameParser.swift; sourceTree = "<group>"; };
+		F98160277AA241B599163275 /* TMDbClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TMDbClient.swift; sourceTree = "<group>"; };
+		088A4C0AC18A451F8A5A6679 /* RenameEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = RenameEngine.swift; sourceTree = "<group>"; };
+		77942C95202F4CF9930E729D /* DropZoneView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DropZoneView.swift; sourceTree = "<group>"; };
+		A93416BFD7A64F8985D8A69F /* FileRowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileRowView.swift; sourceTree = "<group>"; };
+		D3ECE46DC08C46E08C499527 /* MatchPickerSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MatchPickerSheet.swift; sourceTree = "<group>"; };
+		E8EAFF4B1F4243259BA7E28F /* SettingsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SettingsView.swift; sourceTree = "<group>"; };
+		7F1CF2B82D7147DA8619ABF4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		8BDBBDCD21A34AD9B20757B1 /* MediaRenamer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MediaRenamer.entitlements; sourceTree = "<group>"; };
+		23F3C19D6FC04E1896B5540E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		07835A0DA6B54047B32978AF /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		434EDDFBFD594FF3A61A1431 = {
+			isa = PBXGroup;
+			children = (
+				7BC989B4BD604650A307365D /* MediaRenamer */,
+				D106D964A1A5489682EF0056 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		D106D964A1A5489682EF0056 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				AF9845E9168D481C9BF5F973 /* MediaRenamer.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		7BC989B4BD604650A307365D /* MediaRenamer */ = {
+			isa = PBXGroup;
+			children = (
+				AB26F183D4DC4581A48B30B1 /* MediaRenamerApp.swift */,
+				4C8625AD15674820800A4254 /* ContentView.swift */,
+				DBEC4F69A90841E488A0C89A /* Models */,
+				EFCA05F30D8A4FB682407CCA /* Services */,
+				C4AA4B184D9F4F7EB35224F9 /* Views */,
+				23F3C19D6FC04E1896B5540E /* Assets.xcassets */,
+				7F1CF2B82D7147DA8619ABF4 /* Info.plist */,
+				8BDBBDCD21A34AD9B20757B1 /* MediaRenamer.entitlements */,
+			);
+			path = MediaRenamer;
+			sourceTree = "<group>";
+		};
+		DBEC4F69A90841E488A0C89A /* Models */ = {
+			isa = PBXGroup;
+			children = (
+				0AB05A09DB32416682DD1A39 /* MediaItem.swift */,
+				CD31AC84F9414C099F46D0C7 /* TMDbModels.swift */,
+				5486660485BE476185976525 /* LibraryModel.swift */,
+			);
+			path = Models;
+			sourceTree = "<group>";
+		};
+		EFCA05F30D8A4FB682407CCA /* Services */ = {
+			isa = PBXGroup;
+			children = (
+				20A7FCF5C40D4D17B486C5CD /* FilenameParser.swift */,
+				F98160277AA241B599163275 /* TMDbClient.swift */,
+				088A4C0AC18A451F8A5A6679 /* RenameEngine.swift */,
+			);
+			path = Services;
+			sourceTree = "<group>";
+		};
+		C4AA4B184D9F4F7EB35224F9 /* Views */ = {
+			isa = PBXGroup;
+			children = (
+				77942C95202F4CF9930E729D /* DropZoneView.swift */,
+				A93416BFD7A64F8985D8A69F /* FileRowView.swift */,
+				D3ECE46DC08C46E08C499527 /* MatchPickerSheet.swift */,
+				E8EAFF4B1F4243259BA7E28F /* SettingsView.swift */,
+			);
+			path = Views;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		E5C48D518F5C40A0AC828DD1 /* MediaRenamer */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 9F41B648D23B436F882E1B27 /* Build configuration list for PBXNativeTarget "MediaRenamer" */;
+			buildPhases = (
+				478D65CFEBE648DE8DDDBFFB /* Sources */,
+				07835A0DA6B54047B32978AF /* Frameworks */,
+				F0F3439BFF254E60B1AB12BC /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = MediaRenamer;
+			productName = MediaRenamer;
+			productReference = AF9845E9168D481C9BF5F973 /* MediaRenamer.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		397243E09FD245968B0619A3 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1520;
+				LastUpgradeCheck = 1520;
+				TargetAttributes = {
+					E5C48D518F5C40A0AC828DD1 = {
+						CreatedOnToolsVersion = 15.2;
+					};
+				};
+			};
+			buildConfigurationList = B9991C5D581F4ED398CAC5B5 /* Build configuration list for PBXProject "MediaRenamer" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = es;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				es,
+				Base,
+			);
+			mainGroup = 434EDDFBFD594FF3A61A1431;
+			productRefGroup = D106D964A1A5489682EF0056 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				E5C48D518F5C40A0AC828DD1 /* MediaRenamer */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F0F3439BFF254E60B1AB12BC /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				C17E94A2A5774BFA81116354 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		478D65CFEBE648DE8DDDBFFB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				543175CED90546D4A9320085 /* MediaRenamerApp.swift in Sources */,
+				2A5F1E51FA224551B8B0AEAF /* ContentView.swift in Sources */,
+				DC9C16F18467483EB41C4C63 /* MediaItem.swift in Sources */,
+				1CD6C93F73C44FF490F7706A /* TMDbModels.swift in Sources */,
+				B49FDF77D1BA410EB4E72399 /* LibraryModel.swift in Sources */,
+				22142F28BC864CB78F0D87CF /* FilenameParser.swift in Sources */,
+				9145F701B8FA45CF97778436 /* TMDbClient.swift in Sources */,
+				7C1C7030E0E74BAFA0AB197B /* RenameEngine.swift in Sources */,
+				28593B0F05EF44AAB1EF4D56 /* DropZoneView.swift in Sources */,
+				E31A0FE3565D48F6ADBEC1B8 /* FileRowView.swift in Sources */,
+				3FD885342AF747B3ADD4F71E /* MatchPickerSheet.swift in Sources */,
+				6ECA8B9199174522849B3550 /* SettingsView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		34BDA0D0440E421396A24C1F /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+
+			ALWAYS_SEARCH_USER_PATHS = NO;
+			CLANG_ANALYZER_NONNULL = YES;
+			CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+			CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+			CLANG_ENABLE_MODULES = YES;
+			CLANG_ENABLE_OBJC_ARC = YES;
+			CLANG_ENABLE_OBJC_WEAK = YES;
+			CLANG_WARN_BOOL_CONVERSION = YES;
+			CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+			CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+			CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+			CLANG_WARN_EMPTY_BODY = YES;
+			CLANG_WARN_ENUM_CONVERSION = YES;
+			CLANG_WARN_INFINITE_RECURSION = YES;
+			CLANG_WARN_INT_CONVERSION = YES;
+			CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+			CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+			CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+			CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+			CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+			CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+			CLANG_WARN_STRICT_PROTOTYPES = YES;
+			CLANG_WARN_SUSPICIOUS_MOVE = YES;
+			CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+			CLANG_WARN_UNREACHABLE_CODE = YES;
+			CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+			COPY_PHASE_STRIP = NO;
+			DEBUG_INFORMATION_FORMAT = dwarf;
+			ENABLE_STRICT_OBJC_MSGSEND = YES;
+			ENABLE_TESTABILITY = YES;
+			GCC_C_LANGUAGE_STANDARD = gnu17;
+			GCC_DYNAMIC_NO_PIC = NO;
+			GCC_NO_COMMON_BLOCKS = YES;
+			GCC_OPTIMIZATION_LEVEL = 0;
+			GCC_PREPROCESSOR_DEFINITIONS = (
+				"DEBUG=1",
+				"$(inherited)",
+			);
+			GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+			GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+			GCC_WARN_UNDECLARED_SELECTOR = YES;
+			GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+			GCC_WARN_UNUSED_FUNCTION = YES;
+			GCC_WARN_UNUSED_VARIABLE = YES;
+			MACOSX_DEPLOYMENT_TARGET = 13.0;
+			MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+			MTL_FAST_MATH = YES;
+			ONLY_ACTIVE_ARCH = YES;
+			SDKROOT = macosx;
+			SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+			SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		F39F70766C4D4ECBA8B635A1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+
+			ALWAYS_SEARCH_USER_PATHS = NO;
+			CLANG_ANALYZER_NONNULL = YES;
+			CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+			CLANG_CXX_LANGUAGE_STANDARD = "gnu++20";
+			CLANG_ENABLE_MODULES = YES;
+			CLANG_ENABLE_OBJC_ARC = YES;
+			CLANG_ENABLE_OBJC_WEAK = YES;
+			CLANG_WARN_BOOL_CONVERSION = YES;
+			CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+			CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+			CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+			CLANG_WARN_EMPTY_BODY = YES;
+			CLANG_WARN_ENUM_CONVERSION = YES;
+			CLANG_WARN_INFINITE_RECURSION = YES;
+			CLANG_WARN_INT_CONVERSION = YES;
+			CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+			CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+			CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+			CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+			CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+			CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+			CLANG_WARN_STRICT_PROTOTYPES = YES;
+			CLANG_WARN_SUSPICIOUS_MOVE = YES;
+			CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+			CLANG_WARN_UNREACHABLE_CODE = YES;
+			CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+			COPY_PHASE_STRIP = NO;
+			DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+			ENABLE_NS_ASSERTIONS = NO;
+			ENABLE_STRICT_OBJC_MSGSEND = YES;
+			GCC_C_LANGUAGE_STANDARD = gnu17;
+			GCC_NO_COMMON_BLOCKS = YES;
+			GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+			GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+			GCC_WARN_UNDECLARED_SELECTOR = YES;
+			GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+			GCC_WARN_UNUSED_FUNCTION = YES;
+			GCC_WARN_UNUSED_VARIABLE = YES;
+			MACOSX_DEPLOYMENT_TARGET = 13.0;
+			MTL_ENABLE_DEBUG_INFO = NO;
+			MTL_FAST_MATH = YES;
+			SDKROOT = macosx;
+			SWIFT_COMPILATION_MODE = wholemodule;
+			SWIFT_OPTIMIZATION_LEVEL = "-O";
+			};
+			name = Release;
+		};
+		0EE733FF565745E691C22272 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+
+			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+			ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+			CODE_SIGN_ENTITLEMENTS = MediaRenamer/MediaRenamer.entitlements;
+			CODE_SIGN_STYLE = Automatic;
+			COMBINE_HIDPI_IMAGES = YES;
+			CURRENT_PROJECT_VERSION = 1;
+			ENABLE_HARDENED_RUNTIME = YES;
+			ENABLE_PREVIEWS = YES;
+			GENERATE_INFOPLIST_FILE = NO;
+			INFOPLIST_FILE = MediaRenamer/Info.plist;
+			INFOPLIST_KEY_NSHumanReadableCopyright = "";
+			LD_RUNPATH_SEARCH_PATHS = (
+				"$(inherited)",
+				"@executable_path/../Frameworks",
+			);
+			MARKETING_VERSION = 1.0;
+			PRODUCT_BUNDLE_IDENTIFIER = com.rosso27.MediaRenamer;
+			PRODUCT_NAME = "$(TARGET_NAME)";
+			SWIFT_EMIT_LOC_STRINGS = YES;
+			SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		90374366E53D43E6B0EA7A8D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+
+			ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+			ASSETCATALOG_COMPILER_GENERATE_SWIFT_ASSET_SYMBOL_EXTENSIONS = YES;
+			CODE_SIGN_ENTITLEMENTS = MediaRenamer/MediaRenamer.entitlements;
+			CODE_SIGN_STYLE = Automatic;
+			COMBINE_HIDPI_IMAGES = YES;
+			CURRENT_PROJECT_VERSION = 1;
+			ENABLE_HARDENED_RUNTIME = YES;
+			ENABLE_PREVIEWS = YES;
+			GENERATE_INFOPLIST_FILE = NO;
+			INFOPLIST_FILE = MediaRenamer/Info.plist;
+			INFOPLIST_KEY_NSHumanReadableCopyright = "";
+			LD_RUNPATH_SEARCH_PATHS = (
+				"$(inherited)",
+				"@executable_path/../Frameworks",
+			);
+			MARKETING_VERSION = 1.0;
+			PRODUCT_BUNDLE_IDENTIFIER = com.rosso27.MediaRenamer;
+			PRODUCT_NAME = "$(TARGET_NAME)";
+			SWIFT_EMIT_LOC_STRINGS = YES;
+			SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		B9991C5D581F4ED398CAC5B5 /* Build configuration list for PBXProject "MediaRenamer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				34BDA0D0440E421396A24C1F /* Debug */,
+				F39F70766C4D4ECBA8B635A1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		9F41B648D23B436F882E1B27 /* Build configuration list for PBXNativeTarget "MediaRenamer" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0EE733FF565745E691C22272 /* Debug */,
+				90374366E53D43E6B0EA7A8D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 397243E09FD245968B0619A3 /* Project object */;
+}
