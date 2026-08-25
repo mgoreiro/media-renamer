@@ -34,7 +34,7 @@ struct TMDbClient {
 
     func searchMovie(title: String, year: Int?) async throws -> [TMDbCandidate] {
         guard !apiKey.isEmpty else { throw TMDbError.missingAPIKey }
-        var items = [URLQueryItem(name: "query", value: title), URLQueryItem(name: "language", value: "es-ES")]
+        var items = [URLQueryItem(name: "query", value: normalizedQuery(title)), URLQueryItem(name: "language", value: "es-ES")]
         if let year { items.append(URLQueryItem(name: "year", value: String(year))) }
         let url = makeURL(path: "search/movie", queryItems: items)
         let response: TMDbMovieSearchResponse = try await fetch(url)
@@ -43,11 +43,18 @@ struct TMDbClient {
 
     func searchTV(title: String, year: Int?) async throws -> [TMDbCandidate] {
         guard !apiKey.isEmpty else { throw TMDbError.missingAPIKey }
-        var items = [URLQueryItem(name: "query", value: title), URLQueryItem(name: "language", value: "es-ES")]
+        var items = [URLQueryItem(name: "query", value: normalizedQuery(title)), URLQueryItem(name: "language", value: "es-ES")]
         if let year { items.append(URLQueryItem(name: "first_air_date_year", value: String(year))) }
         let url = makeURL(path: "search/tv", queryItems: items)
         let response: TMDbTVSearchResponse = try await fetch(url)
         return response.results.map { $0.asCandidate }
+    }
+
+    /// Elimina tildes/diacríticos del título antes de enviarlo a TMDb, para que
+    /// caracteres especiales (p.ej. "Cómo conocí a vuestra madre" -> "Como conoci
+    /// a vuestra madre") no penalicen la búsqueda.
+    private func normalizedQuery(_ title: String) -> String {
+        title.folding(options: .diacriticInsensitive, locale: .current)
     }
 
     /// Obtiene el título de un episodio concreto de una serie ya identificada por su TMDb id.
