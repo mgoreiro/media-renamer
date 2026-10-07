@@ -1,5 +1,7 @@
 import Foundation
-let root = URL(fileURLWithPath: CommandLine.arguments[1]).resolvingSymlinksInPath()
+// realpath (no resolvingSymlinksInPath, que quita el prefijo /private) para que
+// la ruta coincida con la que devuelve el enumerador de ficheros.
+let root = URL(fileURLWithPath: realpath(CommandLine.arguments[1], nil).map { String(cString: $0) } ?? CommandLine.arguments[1])
 let engine = RenameEngine()
 let lib = LibraryModel()
 AppSettings.shared.apiKey = "testkey"
