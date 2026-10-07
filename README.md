@@ -100,6 +100,9 @@ Se acepta automáticamente si TMDb devuelve 1 resultado, o si exactamente 1 coin
 # Pruebas de la lógica pura (parser, builder, renombrador), sin XCTest
 Tests/run-tests.sh
 
+# Prueba de extremo a extremo con una carpeta de series y un TMDb simulado (sin red ni Llavero)
+Tests/e2e/run-e2e.sh
+
 # Genera dist/MediaRenamer-<versión>.dmg (universal arm64 + x86_64)
 scripts/build-dmg.sh
 ```

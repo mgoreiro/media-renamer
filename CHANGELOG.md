@@ -34,7 +34,7 @@
 - Carátulas en el selector de coincidencias; idioma de los títulos configurable.
 - Ignora ficheros ocultos y paquetes al recorrer carpetas; más extensiones de vídeo.
 - Accesibilidad (etiquetas VoiceOver) y atribución de TMDb.
-- Pruebas automáticas (`Tests/run-tests.sh`) y script de empaquetado (`scripts/build-dmg.sh`).
+- Pruebas automáticas (`Tests/run-tests.sh`, y `Tests/e2e/run-e2e.sh` con TMDb simulado) y script de empaquetado (`scripts/build-dmg.sh`).
 
 ## 1.0
 Primera versión.
