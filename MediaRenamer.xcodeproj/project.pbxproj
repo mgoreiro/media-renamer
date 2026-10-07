@@ -20,6 +20,10 @@
 		3FD885342AF747B3ADD4F71E /* MatchPickerSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = D3ECE46DC08C46E08C499527 /* MatchPickerSheet.swift */; };
 		6ECA8B9199174522849B3550 /* SettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E8EAFF4B1F4243259BA7E28F /* SettingsView.swift */; };
 		C17E94A2A5774BFA81116354 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 23F3C19D6FC04E1896B5540E /* Assets.xcassets */; };
+		2D149988A4264D90A4A9D3A4 /* AppSettings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 70B895FB463A0D6F857AB415 /* AppSettings.swift */; };
+		15923C7C6B035C56E8D63EFE /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 504AF355EA1904F9BF688D0B /* KeychainStore.swift */; };
+		A2E938AFD5FF0B3CF0E657D6 /* FilenameBuilder.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6A3737C147947227E9A90188 /* FilenameBuilder.swift */; };
+		9ECC65392DCCC776A759F614 /* FileRenamer.swift in Sources */ = {isa = PBXBuildFile; fileRef = 881D56A059DF9401FDD2A0A1 /* FileRenamer.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -39,6 +43,10 @@
 		7F1CF2B82D7147DA8619ABF4 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		8BDBBDCD21A34AD9B20757B1 /* MediaRenamer.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = MediaRenamer.entitlements; sourceTree = "<group>"; };
 		23F3C19D6FC04E1896B5540E /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		70B895FB463A0D6F857AB415 /* AppSettings.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppSettings.swift; sourceTree = "<group>"; };
+		504AF355EA1904F9BF688D0B /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainStore.swift; sourceTree = "<group>"; };
+		6A3737C147947227E9A90188 /* FilenameBuilder.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FilenameBuilder.swift; sourceTree = "<group>"; };
+		881D56A059DF9401FDD2A0A1 /* FileRenamer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FileRenamer.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -88,6 +96,7 @@
 			children = (
 				0AB05A09DB32416682DD1A39 /* MediaItem.swift */,
 				CD31AC84F9414C099F46D0C7 /* TMDbModels.swift */,
+				70B895FB463A0D6F857AB415 /* AppSettings.swift */,
 				5486660485BE476185976525 /* LibraryModel.swift */,
 			);
 			path = Models;
@@ -98,6 +107,9 @@
 			children = (
 				20A7FCF5C40D4D17B486C5CD /* FilenameParser.swift */,
 				F98160277AA241B599163275 /* TMDbClient.swift */,
+				881D56A059DF9401FDD2A0A1 /* FileRenamer.swift */,
+				6A3737C147947227E9A90188 /* FilenameBuilder.swift */,
+				504AF355EA1904F9BF688D0B /* KeychainStore.swift */,
 				088A4C0AC18A451F8A5A6679 /* RenameEngine.swift */,
 			);
 			path = Services;
@@ -187,6 +199,10 @@
 				2A5F1E51FA224551B8B0AEAF /* ContentView.swift in Sources */,
 				DC9C16F18467483EB41C4C63 /* MediaItem.swift in Sources */,
 				1CD6C93F73C44FF490F7706A /* TMDbModels.swift in Sources */,
+				9ECC65392DCCC776A759F614 /* FileRenamer.swift in Sources */,
+				A2E938AFD5FF0B3CF0E657D6 /* FilenameBuilder.swift in Sources */,
+				15923C7C6B035C56E8D63EFE /* KeychainStore.swift in Sources */,
+				2D149988A4264D90A4A9D3A4 /* AppSettings.swift in Sources */,
 				B49FDF77D1BA410EB4E72399 /* LibraryModel.swift in Sources */,
 				22142F28BC864CB78F0D87CF /* FilenameParser.swift in Sources */,
 				9145F701B8FA45CF97778436 /* TMDbClient.swift in Sources */,
@@ -319,7 +335,7 @@
 			CODE_SIGN_ENTITLEMENTS = MediaRenamer/MediaRenamer.entitlements;
 			CODE_SIGN_STYLE = Automatic;
 			COMBINE_HIDPI_IMAGES = YES;
-			CURRENT_PROJECT_VERSION = 1;
+			CURRENT_PROJECT_VERSION = 2;
 			ENABLE_HARDENED_RUNTIME = YES;
 			ENABLE_PREVIEWS = YES;
 			GENERATE_INFOPLIST_FILE = NO;
@@ -329,7 +345,7 @@
 				"$(inherited)",
 				"@executable_path/../Frameworks",
 			);
-			MARKETING_VERSION = 1.0;
+			MARKETING_VERSION = 1.1;
 			PRODUCT_BUNDLE_IDENTIFIER = com.rosso27.MediaRenamer;
 			PRODUCT_NAME = "$(TARGET_NAME)";
 			SWIFT_EMIT_LOC_STRINGS = YES;
@@ -346,7 +362,7 @@
 			CODE_SIGN_ENTITLEMENTS = MediaRenamer/MediaRenamer.entitlements;
 			CODE_SIGN_STYLE = Automatic;
 			COMBINE_HIDPI_IMAGES = YES;
-			CURRENT_PROJECT_VERSION = 1;
+			CURRENT_PROJECT_VERSION = 2;
 			ENABLE_HARDENED_RUNTIME = YES;
 			ENABLE_PREVIEWS = YES;
 			GENERATE_INFOPLIST_FILE = NO;
@@ -356,7 +372,7 @@
 				"$(inherited)",
 				"@executable_path/../Frameworks",
 			);
-			MARKETING_VERSION = 1.0;
+			MARKETING_VERSION = 1.1;
 			PRODUCT_BUNDLE_IDENTIFIER = com.rosso27.MediaRenamer;
 			PRODUCT_NAME = "$(TARGET_NAME)";
 			SWIFT_EMIT_LOC_STRINGS = YES;

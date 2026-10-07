@@ -1,12 +1,12 @@
 import SwiftUI
 
 struct SettingsView: View {
-    @AppStorage("tmdbAPIKey") private var apiKey: String = ""
+    @ObservedObject private var settings = AppSettings.shared
 
     var body: some View {
         Form {
             Section {
-                SecureField("API Key de TMDb", text: $apiKey)
+                SecureField("API key o token de TMDb", text: $settings.apiKey)
                     .textFieldStyle(.roundedBorder)
                 Link("Consigue una API key gratuita en themoviedb.org",
                      destination: URL(string: "https://www.themoviedb.org/settings/api")!)
@@ -14,12 +14,26 @@ struct SettingsView: View {
             } header: {
                 Text("TMDb")
             } footer: {
-                Text("La app usa TMDb (The Movie Database) para buscar metadatos de películas y series. Necesitas una cuenta gratuita y una API key v3.")
+                Text("Vale la API key v3 o el «API Read Access Token» v4 (recomendado: no viaja en la URL). Se guarda en el Llavero de macOS.")
                     .font(.caption)
-                    .foregroundColor(.secondary)
+                    .foregroundStyle(.secondary)
+            }
+
+            Section {
+                Picker("Idioma de los títulos", selection: $settings.language) {
+                    ForEach(AppSettings.languages, id: \.code) { language in
+                        Text(language.name).tag(language.code)
+                    }
+                }
+            }
+
+            Section {
+                Text("Este producto usa la API de TMDb pero no está avalado ni certificado por TMDb.")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
         }
         .padding(20)
-        .frame(width: 420, height: 180)
+        .frame(width: 460, height: 300)
     }
 }

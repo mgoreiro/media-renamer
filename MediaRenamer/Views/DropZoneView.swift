@@ -8,7 +8,7 @@ struct DropZoneView: View {
     var body: some View {
         RoundedRectangle(cornerRadius: 14)
             .strokeBorder(style: StrokeStyle(lineWidth: 2, dash: [8]))
-            .foregroundColor(isTargeted ? .accentColor : .secondary.opacity(0.5))
+            .foregroundStyle(isTargeted ? Color.accentColor : Color.secondary.opacity(0.5))
             .background(
                 RoundedRectangle(cornerRadius: 14)
                     .fill(isTargeted ? Color.accentColor.opacity(0.08) : Color.clear)
@@ -17,58 +17,49 @@ struct DropZoneView: View {
                 VStack(spacing: 8) {
                     Image(systemName: "arrow.down.doc")
                         .font(.system(size: 32))
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                     Text("Arrastra aquí episodios o películas")
                         .font(.headline)
-                    Text("Se aceptan ficheros y carpetas")
+                    Text("Se aceptan ficheros y carpetas (o usa Abrir… con ⌘O)")
                         .font(.caption)
-                        .foregroundColor(.secondary)
+                        .foregroundStyle(.secondary)
                 }
             )
             .frame(minHeight: 140)
+            .accessibilityElement(children: .ignore)
+            .accessibilityLabel("Zona para soltar ficheros o carpetas de vídeo")
             .onDrop(of: [UTType.fileURL], isTargeted: $isTargeted) { providers in
                 handleDrop(providers: providers)
-                return true
             }
     }
 
-    private func handleDrop(providers: [NSItemProvider]) {
+    private func handleDrop(providers: [NSItemProvider]) -> Bool {
+        let accepted = providers.filter { $0.hasItemConformingToTypeIdentifier(UTType.fileURL.identifier) }
+        guard !accepted.isEmpty else { return false }
+
+        // Los callbacks llegan en hilos arbitrarios: el acceso a `collected` se serializa con un lock.
+        let lock = NSLock()
         var collected: [URL] = []
         let group = DispatchGroup()
 
-        for provider in providers {
+        for provider in accepted {
             group.enter()
             _ = provider.loadObject(ofClass: URL.self) { url, _ in
-                if let url {
-                    collected.append(contentsOf: expandIfNeeded(url))
-                }
-                group.leave()
+                defer { group.leave() }
+                guard let url else { return }
+                let found = MediaFileScanner.expand(url)
+                lock.lock()
+                collected.append(contentsOf: found)
+                lock.unlock()
             }
         }
 
         group.notify(queue: .main) {
-            onDrop(collected)
+            lock.lock()
+            let result = collected
+            lock.unlock()
+            onDrop(result)
         }
-    }
-
-    /// Si el usuario suelta una carpeta, recoge recursivamente los ficheros de vídeo que contiene.
-    private func expandIfNeeded(_ url: URL) -> [URL] {
-        let videoExtensions: Set<String> = ["mkv", "mp4", "avi", "mov", "m4v", "wmv", "ts"]
-        var isDir: ObjCBool = false
-        guard FileManager.default.fileExists(atPath: url.path, isDirectory: &isDir) else { return [] }
-
-        if isDir.boolValue {
-            var results: [URL] = []
-            if let enumerator = FileManager.default.enumerator(at: url, includingPropertiesForKeys: nil) {
-                for case let fileURL as URL in enumerator {
-                    if videoExtensions.contains(fileURL.pathExtension.lowercased()) {
-                        results.append(fileURL)
-                    }
-                }
-            }
-            return results
-        } else {
-            return videoExtensions.contains(url.pathExtension.lowercased()) ? [url] : []
-        }
+        return true
     }
 }

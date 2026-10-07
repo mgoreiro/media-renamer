@@ -9,24 +9,18 @@ enum MediaKind: String, Codable {
 enum MatchStatus: Equatable {
     case pending          // aún no se ha buscado
     case searching        // búsqueda en curso
-    case autoMatched      // coincidencia única de alta confianza
+    case autoMatched      // coincidencia elegida (automática o manual), lista para renombrar
     case needsSelection   // varias coincidencias, el usuario debe elegir
     case noResults        // TMDb no devolvió nada
     case error(String)    // fallo de red / parseo
     case renamed          // ya renombrado en disco
     case renameFailed(String)
 
-    static func == (lhs: MatchStatus, rhs: MatchStatus) -> Bool {
-        switch (lhs, rhs) {
-        case (.pending, .pending), (.searching, .searching), (.autoMatched, .autoMatched),
-             (.needsSelection, .needsSelection), (.noResults, .noResults), (.renamed, .renamed):
-            return true
-        case let (.error(a), .error(b)):
-            return a == b
-        case let (.renameFailed(a), .renameFailed(b)):
-            return a == b
-        default:
-            return false
+    /// Estados que "Buscar coincidencias" vuelve a intentar.
+    var isSearchable: Bool {
+        switch self {
+        case .pending, .noResults, .error: return true
+        default: return false
         }
     }
 }
@@ -41,15 +35,23 @@ final class MediaItem: Identifiable, ObservableObject {
     @Published var parsedYear: Int?
     @Published var season: Int?
     @Published var episode: Int?
+    @Published var episodeEnd: Int?
     @Published var kind: MediaKind
 
     // Resultado de la búsqueda en TMDb
     @Published var candidates: [TMDbCandidate] = []
     @Published var selectedCandidate: TMDbCandidate?
     @Published var episodeTitle: String?
+    /// La coincidencia la eligió el usuario a mano: no se sobrescribe al propagar a la serie.
+    var manuallySelected = false
 
     @Published var status: MatchStatus = .pending
     @Published var proposedFilename: String?
+    /// Aviso no bloqueante (p. ej. no se pudo obtener el título del episodio).
+    @Published var warning: String?
+
+    /// Movimientos realizados en disco (vídeo + subtítulos); permiten deshacer.
+    @Published var renamedOps: [RenameOp] = []
 
     init(url: URL, parsed: ParsedFilename) {
         self.originalURL = url
@@ -57,10 +59,16 @@ final class MediaItem: Identifiable, ObservableObject {
         self.parsedYear = parsed.year
         self.season = parsed.season
         self.episode = parsed.episode
+        self.episodeEnd = parsed.episodeEnd
         self.kind = parsed.kind
     }
 
     var fileExtension: String {
         originalURL.pathExtension
+    }
+
+    /// Ubicación actual del fichero (tras renombrar, la nueva).
+    var currentURL: URL {
+        renamedOps.first?.to ?? originalURL
     }
 }

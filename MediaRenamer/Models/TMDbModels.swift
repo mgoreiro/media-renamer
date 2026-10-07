@@ -6,6 +6,9 @@ struct TMDbCandidate: Identifiable, Hashable {
     let id: Int
     let kind: MediaKind
     let title: String
+    /// Título original (idioma de producción); sirve para reconocer coincidencias
+    /// cuando el nombre del fichero está en inglés y TMDb devuelve el título localizado.
+    let originalTitle: String?
     let year: Int?
     let overview: String
     let posterPath: String?
@@ -14,7 +17,18 @@ struct TMDbCandidate: Identifiable, Hashable {
         if let year { return "\(title) (\(year))" }
         return title
     }
+
+    var posterURL: URL? {
+        posterPath.flatMap { URL(string: "https://image.tmdb.org/t/p/w92\($0)") }
+    }
 }
+
+private func year(from date: String?) -> Int? {
+    guard let date, date.count >= 4 else { return nil }
+    return Int(date.prefix(4))
+}
+
+// Los DTOs se decodifican con `keyDecodingStrategy = .convertFromSnakeCase`.
 
 struct TMDbMovieSearchResponse: Decodable {
     let results: [TMDbMovieResult]
@@ -23,20 +37,14 @@ struct TMDbMovieSearchResponse: Decodable {
 struct TMDbMovieResult: Decodable {
     let id: Int
     let title: String
+    let originalTitle: String?
     let overview: String?
     let releaseDate: String?
     let posterPath: String?
 
-    enum CodingKeys: String, CodingKey {
-        case id, title, overview
-        case releaseDate = "release_date"
-        case posterPath = "poster_path"
-    }
-
     var asCandidate: TMDbCandidate {
-        let year = releaseDate?.prefix(4).isEmpty == false ? Int(releaseDate!.prefix(4)) : nil
-        return TMDbCandidate(id: id, kind: .movie, title: title, year: year,
-                              overview: overview ?? "", posterPath: posterPath)
+        TMDbCandidate(id: id, kind: .movie, title: title, originalTitle: originalTitle,
+                      year: year(from: releaseDate), overview: overview ?? "", posterPath: posterPath)
     }
 }
 
@@ -47,31 +55,22 @@ struct TMDbTVSearchResponse: Decodable {
 struct TMDbTVResult: Decodable {
     let id: Int
     let name: String
+    let originalName: String?
     let overview: String?
     let firstAirDate: String?
     let posterPath: String?
 
-    enum CodingKeys: String, CodingKey {
-        case id, name, overview
-        case firstAirDate = "first_air_date"
-        case posterPath = "poster_path"
-    }
-
     var asCandidate: TMDbCandidate {
-        let year = firstAirDate?.prefix(4).isEmpty == false ? Int(firstAirDate!.prefix(4)) : nil
-        return TMDbCandidate(id: id, kind: .episode, title: name, year: year,
-                              overview: overview ?? "", posterPath: posterPath)
+        TMDbCandidate(id: id, kind: .episode, title: name, originalTitle: originalName,
+                      year: year(from: firstAirDate), overview: overview ?? "", posterPath: posterPath)
     }
 }
 
-struct TMDbEpisodeResponse: Decodable {
-    let name: String
-    let episodeNumber: Int
-    let seasonNumber: Int
-
-    enum CodingKeys: String, CodingKey {
-        case name
-        case episodeNumber = "episode_number"
-        case seasonNumber = "season_number"
+/// Temporada completa: una sola petición da el título de todos sus episodios.
+struct TMDbSeasonResponse: Decodable {
+    struct Episode: Decodable {
+        let episodeNumber: Int
+        let name: String
     }
+    let episodes: [Episode]
 }

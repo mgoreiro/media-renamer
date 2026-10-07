@@ -5,6 +5,8 @@ struct ParsedFilename {
     var year: Int?
     var season: Int?
     var episode: Int?
+    /// Último episodio de un fichero multi-episodio (S01E01E02, S01E01-E03).
+    var episodeEnd: Int?
     var kind: MediaKind
 }
 
@@ -12,130 +14,195 @@ struct ParsedFilename {
 /// extraer el título, el año y, si es un episodio, la temporada/episodio.
 enum FilenameParser {
 
-    // Palabras/etiquetas típicas de release que hay que eliminar del título.
+    // Etiquetas típicas de release. Se buscan siempre como palabra completa
+    // (así "web" no corta "Webster" ni "cam" corta "Cambio").
     private static let junkTokens: [String] = [
-        "1080p", "720p", "2160p", "480p", "4k", "uhd", "hdr", "hdr10",
-        "web-dl", "webdl", "web", "webrip", "bluray", "blu-ray", "bdrip",
-        "brrip", "dvdrip", "hdtv", "hdcam", "cam",
-        "x264", "x265", "h264", "h265", "hevc", "avc",
-        "aac", "ac3", "dts", "dd5.1", "5.1", "atmos",
-        "amzn", "nf", "netflix", "hulu", "dsnp", "hmax",
+        "1080p", "1080i", "720p", "2160p", "480p", "576p", "4k", "uhd", "hdr", "hdr10", "hdr10plus", "dv",
+        "web-dl", "webdl", "webrip", "web", "bluray", "blu-ray", "bdrip", "bdremux", "brrip", "dvdrip", "hdtv",
+        "hdrip", "hdcam", "cam", "x264", "x265", "h264", "h265", "hevc", "avc", "10bit", "8bit",
+        "aac", "ac3", "eac3", "dts", "dts-hd", "truehd", "ddp5", "dd5", "dd2", "atmos",
+        "amzn", "nf", "netflix", "hulu", "dsnp", "hmax", "atvp", "pcok",
         "dual", "multi", "subs", "subtitulado", "spanish", "castellano",
         "latino", "eng", "esp", "vose", "vosi", "remux", "proper", "repack",
-        "extended", "unrated", "internal"
+        "extended", "unrated", "internal", "directors cut", "remastered"
     ]
 
+    private static let junkRegex: NSRegularExpression = {
+        let alternatives = junkTokens
+            .sorted { $0.count > $1.count }
+            .map { NSRegularExpression.escapedPattern(for: $0) }
+            .joined(separator: "|")
+        return try! NSRegularExpression(pattern: "(?<![A-Za-z0-9])(?:\(alternatives))(?![A-Za-z0-9])",
+                                        options: [.caseInsensitive])
+    }()
+
+    private static let sxxEyy = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9])[Ss](\d{1,2})[ ]?[Ee](\d{1,3})((?:[ ]?-?[ ]?[Ee]\d{1,3})*)(?!\d)"#)
+    private static let nxmm = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9])(\d{1,2})[xX](\d{2,3})(?!\d)"#)
+    private static let longForm = try! NSRegularExpression(
+        pattern: #"(?:[Ss]eason|[Tt]emporada)[ ]?(\d{1,2}).*?(?:[Ee]pisode|[Ee]pisodio|[Cc]ap[ií]tulo)[ ]?(\d{1,3})"#)
+    private static let yearRegex = try! NSRegularExpression(
+        pattern: #"(?<![0-9])(19\d{2}|20\d{2})(?![0-9])"#)
+    private static let seasonFolder = try! NSRegularExpression(
+        pattern: #"^(?:season|temporada|temp|s)[ ._-]?(\d{1,2})$"#, options: [.caseInsensitive])
+    private static let bareEpisode = try! NSRegularExpression(
+        pattern: #"^(?:e|ep|episode|episodio|cap)?[ ]?(\d{1,3})$"#, options: [.caseInsensitive])
+
+    // MARK: - API
+
+    /// Analiza solo el nombre de fichero (la extensión se descarta).
     static func parse(filename: String) -> ParsedFilename {
         let ext = (filename as NSString).pathExtension
-        var name = ext.isEmpty ? filename : String(filename.dropLast(ext.count + 1))
+        let name = ext.isEmpty ? filename : String(filename.dropLast(ext.count + 1))
+        return parseName(name)
+    }
 
-        // Normaliza separadores comunes a espacios para facilitar el análisis.
-        let normalized = name.replacingOccurrences(of: ".", with: " ")
-                              .replacingOccurrences(of: "_", with: " ")
+    /// Analiza un fichero usando además las carpetas que lo contienen cuando el
+    /// nombre no basta (`Serie/Temporada 1/03.mkv`, `Película (2019)/S01E03.mkv`…).
+    static func parse(url: URL) -> ParsedFilename {
+        let ext = url.pathExtension
+        let base = ext.isEmpty ? url.lastPathComponent : url.deletingPathExtension().lastPathComponent
+        let parent = url.deletingLastPathComponent().lastPathComponent
+        let grandparent = url.deletingLastPathComponent().deletingLastPathComponent().lastPathComponent
+
+        // "03.mkv" dentro de una carpeta de temporada.
+        if let number = firstGroupInt(bareEpisode, in: base),
+           let season = seasonNumber(inFolder: parent) {
+            let show = parseName(grandparent)
+            return ParsedFilename(title: show.title, year: show.year, season: season,
+                                  episode: number, episodeEnd: nil, kind: .episode)
+        }
+
+        var parsed = parseName(base)
+        guard parsed.title.isEmpty || isJunkOnly(parsed.title) else { return parsed }
+
+        // Sin título en el nombre: se toma de la carpeta (saltando "Season N").
+        if let season = seasonNumber(inFolder: parent) {
+            let show = parseName(grandparent)
+            parsed.title = show.title
+            parsed.year = parsed.year ?? show.year
+            parsed.season = parsed.season ?? season
+        } else {
+            let folder = parseName(parent)
+            parsed.title = folder.title
+            parsed.year = parsed.year ?? folder.year
+            if parsed.season == nil, folder.kind == .episode { parsed.season = folder.season }
+        }
+        return parsed
+    }
+
+    // MARK: - Núcleo
+
+    static func parseName(_ name: String) -> ParsedFilename {
+        let text = name.replacingOccurrences(of: ".", with: " ")
+                       .replacingOccurrences(of: "_", with: " ")
+        let full = NSRange(text.startIndex..., in: text)
 
         var season: Int?
         var episode: Int?
-        var kind: MediaKind = .unknown
-        var cutIndex: String.Index?
+        var episodeEnd: Int?
+        var kind: MediaKind = .movie
+        var episodeStart: String.Index?
 
-        // Patrón SxxEyy (p.ej. S01E02, s1e2)
-        if let match = normalized.range(of: #"[Ss](\d{1,2})[ ]?[Ee](\d{1,3})"#, options: .regularExpression) {
-            let matched = String(normalized[match])
-            let digits = matched.uppercased()
-                .replacingOccurrences(of: "S", with: " ")
-                .replacingOccurrences(of: "E", with: " ")
-                .split(separator: " ")
-            if digits.count >= 2 {
-                season = Int(digits[0])
-                episode = Int(digits[1])
-                kind = .episode
-                cutIndex = match.lowerBound
-            }
-        }
-
-        // Patrón 1x02
-        if kind == .unknown, let match = normalized.range(of: #"(\d{1,2})[xX](\d{2,3})"#, options: .regularExpression) {
-            let matched = String(normalized[match])
-            let parts = matched.lowercased().split(separator: "x")
-            if parts.count == 2 {
-                season = Int(parts[0])
-                episode = Int(parts[1])
-                kind = .episode
-                cutIndex = match.lowerBound
-            }
-        }
-
-        // Patrón "Season 1 Episode 2"
-        if kind == .unknown, let match = normalized.range(of: #"[Ss]eason[ ]?\d{1,2}.*?[Ee]pisode[ ]?\d{1,3}"#, options: .regularExpression) {
-            let matched = String(normalized[match])
-            if let seasonRange = matched.range(of: #"(?<=[Ss]eason[ ]?)\d{1,2}"#, options: .regularExpression) {
-                season = Int(matched[seasonRange])
-            }
-            if let episodeRange = matched.range(of: #"(?<=[Ee]pisode[ ]?)\d{1,3}"#, options: .regularExpression) {
-                episode = Int(matched[episodeRange])
+        if let m = sxxEyy.firstMatch(in: text, range: full), let r = Range(m.range, in: text) {
+            season = intGroup(m, 1, in: text)
+            episode = intGroup(m, 2, in: text)
+            if let extra = group(m, 3, in: text), !extra.isEmpty {
+                let numbers = extra.split(whereSeparator: { !$0.isNumber }).compactMap { Int($0) }
+                if let last = numbers.last, let first = episode, last > first { episodeEnd = last }
             }
             kind = .episode
-            cutIndex = match.lowerBound
+            episodeStart = r.lowerBound
+        } else if let m = nxmm.firstMatch(in: text, range: full), let r = Range(m.range, in: text) {
+            season = intGroup(m, 1, in: text)
+            episode = intGroup(m, 2, in: text)
+            kind = .episode
+            episodeStart = r.lowerBound
+        } else if let m = longForm.firstMatch(in: text, range: full), let r = Range(m.range, in: text) {
+            season = intGroup(m, 1, in: text)
+            episode = intGroup(m, 2, in: text)
+            kind = .episode
+            episodeStart = r.lowerBound
         }
 
-        name = normalized
-
-        // Año de 4 dígitos (19xx / 20xx), típicamente entre paréntesis o suelto.
+        // Año: se prefiere el que va entre paréntesis/corchetes y, si no, el último
+        // que tenga un título delante (así "2012", "1917" o "Blade Runner 2049 (2017)" funcionan).
         var year: Int?
-        if let match = name.range(of: #"\b(19\d{2}|20\d{2})\b"#, options: .regularExpression) {
-            year = Int(name[match])
-            // Si el año aparece antes del marcador de temporada/episodio, recorta ahí también.
-            if let cut = cutIndex, match.lowerBound < cut {
-                cutIndex = match.lowerBound
-            } else if cutIndex == nil {
-                cutIndex = match.lowerBound
+        var yearCut: String.Index?
+        let maxYear = Calendar.current.component(.year, from: Date()) + 1
+        var best: (year: Int, cut: String.Index, bracketed: Bool)?
+        for m in yearRegex.matches(in: text, range: full) {
+            guard let r = Range(m.range, in: text), let value = intGroup(m, 1, in: text), value <= maxYear else { continue }
+            if let episodeStart, r.lowerBound > episodeStart { continue }
+            var cut = r.lowerBound
+            var bracketed = false
+            if let open = previousNonSpace(before: r.lowerBound, in: text), "([".contains(text[open]) {
+                cut = open
+                bracketed = true
             }
+            guard !cleanUpTitle(String(text[..<cut])).isEmpty else { continue }
+            if let current = best, current.bracketed, !bracketed { continue }
+            best = (value, cut, bracketed)
+        }
+        if let best { year = best.year; yearCut = best.cut }
+
+        // Primera etiqueta de release con título delante.
+        var junkCut: String.Index?
+        for m in junkRegex.matches(in: text, range: full) {
+            guard let r = Range(m.range, in: text) else { continue }
+            if !cleanUpTitle(String(text[..<r.lowerBound])).isEmpty { junkCut = r.lowerBound; break }
         }
 
-        // El título es todo lo que precede al primer marcador (S01E01, año, o tag de calidad).
-        var titlePart = name
-        if let cutIndex {
-            titlePart = String(name[name.startIndex..<cutIndex])
-        } else {
-            // Si no hay temporada/episodio ni año, corta en el primer tag de calidad conocido.
-            let lower = name.lowercased()
-            var earliestRange: Range<String.Index>?
-            for token in junkTokens {
-                if let r = lower.range(of: token) {
-                    if earliestRange == nil || r.lowerBound < earliestRange!.lowerBound {
-                        earliestRange = r
-                    }
-                }
-            }
-            if let earliestRange {
-                let offset = lower.distance(from: lower.startIndex, to: earliestRange.lowerBound)
-                let idx = name.index(name.startIndex, offsetBy: offset)
-                titlePart = String(name[name.startIndex..<idx])
-            }
-        }
+        let cut = [episodeStart, yearCut, junkCut].compactMap { $0 }.min() ?? text.endIndex
+        let title = cleanUpTitle(String(text[..<cut]))
 
-        let cleanTitle = cleanUpTitle(titlePart)
-
-        if kind == .unknown {
-            kind = .movie
-        }
-
-        return ParsedFilename(title: cleanTitle, year: year, season: season, episode: episode, kind: kind)
+        return ParsedFilename(title: title, year: year, season: season, episode: episode,
+                              episodeEnd: episodeEnd, kind: kind)
     }
+
+    // MARK: - Helpers
 
     private static func cleanUpTitle(_ raw: String) -> String {
         var result = raw
-
-        // Elimina paréntesis/corchetes con su contenido (a veces contienen el año, lo capturamos aparte).
+        // Quita bloques entre paréntesis/corchetes/llaves.
         result = result.replacingOccurrences(of: #"[\(\[\{][^\)\]\}]*[\)\]\}]"#, with: " ", options: .regularExpression)
-
-        // Colapsa espacios múltiples y recorta.
         result = result.replacingOccurrences(of: #"\s+"#, with: " ", options: .regularExpression)
-        result = result.trimmingCharacters(in: .whitespacesAndNewlines)
+        // Quita signos sueltos al principio/final (incluidos paréntesis sin cerrar).
+        return result.trimmingCharacters(in: CharacterSet(charactersIn: "-. ([{").union(.whitespacesAndNewlines))
+    }
 
-        // Quita guiones/puntos sueltos al final típicos de release names.
-        result = result.trimmingCharacters(in: CharacterSet(charactersIn: "-. "))
+    /// "1080p", "BluRay"…: un título que son solo etiquetas de release no es un título.
+    private static func isJunkOnly(_ title: String) -> Bool {
+        let range = NSRange(title.startIndex..., in: title)
+        guard let m = junkRegex.firstMatch(in: title, range: range) else { return false }
+        return m.range == range
+    }
 
-        return result
+    private static func previousNonSpace(before index: String.Index, in text: String) -> String.Index? {
+        var i = index
+        while i > text.startIndex {
+            i = text.index(before: i)
+            if text[i] != " " { return i }
+        }
+        return nil
+    }
+
+    private static func seasonNumber(inFolder name: String) -> Int? {
+        firstGroupInt(seasonFolder, in: name)
+    }
+
+    private static func firstGroupInt(_ regex: NSRegularExpression, in text: String) -> Int? {
+        guard let m = regex.firstMatch(in: text, range: NSRange(text.startIndex..., in: text)) else { return nil }
+        return intGroup(m, 1, in: text)
+    }
+
+    private static func group(_ m: NSTextCheckingResult, _ i: Int, in text: String) -> String? {
+        guard i < m.numberOfRanges, let r = Range(m.range(at: i), in: text) else { return nil }
+        return String(text[r])
+    }
+
+    private static func intGroup(_ m: NSTextCheckingResult, _ i: Int, in text: String) -> Int? {
+        group(m, i, in: text).flatMap { Int($0) }
     }
 }

@@ -11,11 +11,11 @@ final class LibraryModel: ObservableObject {
     private var cancellables: [UUID: AnyCancellable] = [:]
 
     func add(_ urls: [URL]) {
-        let existing = Set(items.map { $0.originalURL })
+        var known = Set(items.map { $0.originalURL.standardizedFileURL })
         var newItems: [MediaItem] = []
-        for url in urls where !existing.contains(url) {
-            let parsed = FilenameParser.parse(filename: url.lastPathComponent)
-            newItems.append(MediaItem(url: url, parsed: parsed))
+        let sorted = urls.sorted { $0.path.localizedStandardCompare($1.path) == .orderedAscending }
+        for url in sorted where known.insert(url.standardizedFileURL).inserted {
+            newItems.append(MediaItem(url: url, parsed: FilenameParser.parse(url: url)))
         }
         for item in newItems {
             cancellables[item.id] = item.objectWillChange.sink { [weak self] _ in
@@ -25,6 +25,11 @@ final class LibraryModel: ObservableObject {
         items.append(contentsOf: newItems)
     }
 
+    func remove(_ item: MediaItem) {
+        items.removeAll { $0.id == item.id }
+        cancellables[item.id] = nil
+    }
+
     func clear() {
         items.removeAll()
         cancellables.removeAll()
@@ -32,5 +37,9 @@ final class LibraryModel: ObservableObject {
 
     var hasRenameableItems: Bool {
         items.contains { $0.status == .autoMatched }
+    }
+
+    var hasUndoableItems: Bool {
+        items.contains { $0.status == .renamed && !$0.renamedOps.isEmpty }
     }
 }
