@@ -76,6 +76,31 @@ struct TMDbClient {
         return response.results.map { $0.asCandidate }
     }
 
+    /// Extrae tipo e id de un enlace de TMDb (`…/movie/603-matrix`, `…/tv/1396/season/1`).
+    /// Devuelve `nil` si el texto no es un enlace de themoviedb.org reconocible.
+    static func parseTMDbURL(_ text: String) -> (kind: MediaKind, id: Int)? {
+        var raw = text.trimmingCharacters(in: .whitespacesAndNewlines)
+        if !raw.contains("://") { raw = "https://" + raw }
+        guard let url = URL(string: raw), let host = url.host?.lowercased(),
+              host == "themoviedb.org" || host.hasSuffix(".themoviedb.org") else { return nil }
+        let parts = url.pathComponents.filter { $0 != "/" }
+        guard parts.count >= 2, parts[0] == "movie" || parts[0] == "tv",
+              let id = Int(parts[1].prefix(while: \.isNumber)) else { return nil }
+        return (parts[0] == "movie" ? .movie : .episode, id)
+    }
+
+    func movieDetails(id: Int) async throws -> TMDbCandidate {
+        let result: TMDbMovieResult = try await fetch(
+            path: "movie/\(id)", queryItems: [URLQueryItem(name: "language", value: language)])
+        return result.asCandidate
+    }
+
+    func tvDetails(id: Int) async throws -> TMDbCandidate {
+        let result: TMDbTVResult = try await fetch(
+            path: "tv/\(id)", queryItems: [URLQueryItem(name: "language", value: language)])
+        return result.asCandidate
+    }
+
     /// Títulos de todos los episodios de una temporada (una petición, cacheada).
     func episodeTitles(tvID: Int, season: Int) async throws -> [Int: String] {
         let key = "\(language)|\(tvID)|\(season)"

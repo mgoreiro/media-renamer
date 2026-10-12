@@ -170,6 +170,13 @@ final class RenameEngine {
         item.manuallySelected = manual
         item.warning = nil
         item.episodeTitle = nil
+        // Una elección manual (p. ej. un enlace a una serie) manda sobre el tipo detectado.
+        if manual, candidate.kind != .unknown, candidate.kind != item.kind {
+            item.kind = candidate.kind
+        }
+        if item.kind == .episode, item.season == nil || item.episode == nil {
+            item.warning = "No se detectó temporada/episodio en el nombre del archivo."
+        }
 
         if item.kind == .episode, let season = item.season, let episode = item.episode {
             do {
