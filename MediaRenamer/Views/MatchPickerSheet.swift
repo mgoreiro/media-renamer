@@ -32,7 +32,7 @@ struct MatchPickerSheet: View {
             }
 
             HStack {
-                TextField("Buscar en TMDb…", text: $searchText)
+                TextField("Buscar en TMDb o pegar un enlace…", text: $searchText)
                     .textFieldStyle(.roundedBorder)
                     .onSubmit { runManualSearch() }
                 Button("Buscar") { runManualSearch() }
@@ -111,6 +111,13 @@ struct MatchPickerSheet: View {
         Task {
             do {
                 let client = engine.client
+                if let link = TMDbClient.parseTMDbURL(text) {
+                    // El tipo del enlace manda sobre el detectado en el nombre del archivo.
+                    manualResults = [link.kind == .episode ? try await client.tvDetails(id: link.id)
+                                                           : try await client.movieDetails(id: link.id)]
+                    isSearching = false
+                    return
+                }
                 let results = isEpisode ? try await client.searchTV(title: text, year: nil)
                                         : try await client.searchMovie(title: text, year: nil)
                 manualResults = results
