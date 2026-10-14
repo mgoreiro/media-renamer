@@ -42,6 +42,13 @@ enum FilenameParser {
         pattern: #"(?<![A-Za-z0-9])(\d{1,2})[xX](\d{2,3})(?!\d)"#)
     private static let longForm = try! NSRegularExpression(
         pattern: #"(?:[Ss]eason|[Tt]emporada)[ ]?(\d{1,2}).*?(?:[Ee]pisode|[Ee]pisodio|[Cc]ap[ií]tulo)[ ]?(\d{1,3})"#)
+    /// Rips de disco: "Serie (1973) [DISCO 1][…]_T03" → título 3 del disco.
+    private static let discTitle = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9])T(\d{1,3})\s*$"#)
+    private static let discMarker = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9])(?:disco|disc|disk|dvd|bd)[ ]?\d{1,2}(?![A-Za-z0-9])"#, options: [.caseInsensitive])
+    private static let extrasMarker = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9])extras?(?![A-Za-z0-9])"#, options: [.caseInsensitive])
     private static let yearRegex = try! NSRegularExpression(
         pattern: #"(?<![0-9])(19\d{2}|20\d{2})(?![0-9])"#)
     private static let seasonFolder = try! NSRegularExpression(
@@ -124,6 +131,13 @@ enum FilenameParser {
             episode = intGroup(m, 2, in: text)
             kind = .episode
             episodeStart = r.lowerBound
+        } else if let m = discTitle.firstMatch(in: text, range: full),
+                  discMarker.firstMatch(in: text, range: full) != nil {
+            // Sin SxxEyy: el número de título del disco hace de episodio (temporada 1;
+            // los extras van a la temporada 0 de especiales de TMDb).
+            season = extrasMarker.firstMatch(in: text, range: full) != nil ? 0 : 1
+            episode = intGroup(m, 1, in: text)
+            kind = .episode
         }
 
         // Año: se prefiere el que va entre paréntesis/corchetes y, si no, el último
