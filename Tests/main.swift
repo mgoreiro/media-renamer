@@ -34,6 +34,14 @@ r = p("Serie S01E01 - 1080p.mkv"); check(r.episodeEnd, nil, "no confundir resolu
 r = p("Show (2019) S02E03.mkv"); check(r.year, 2019, "serie año"); check(r.title, "Show", "serie año title")
 r = p("Show S01E01 2015 Remastered.mkv"); check(r.year, nil, "año tras episodio ignorado")
 
+r = p("El Mundo en Guerra (1973) [Remasterizado][DISCO 1][FullBluray 1080p AVC ES DD 2.0][HDO]_T03.m4v")
+check(r.title, "El Mundo en Guerra", "disco title"); check(r.year, 1973, "disco year"); check(r.kind, .episode, "disco kind")
+check(r.season, 1, "disco s"); check(r.episode, 3, "disco e")
+r = p("El Mundo en Guerra (1973) [Remasterizado][EXTRAS][DISCO 3][FullBluray 1080p AVC EN DD 2.0 Subs][HDO]_T02.m4v")
+check(r.season, 0, "extras s"); check(r.episode, 2, "extras e")
+r = p("Peli (2000) [DISCO 1]_T01.mkv"); check(r.kind, .episode, "marcador disco")
+r = p("Peli (2000) 1080p_T01.mkv"); check(r.kind, .movie, "T01 sin disco no es episodio")
+
 // Contexto de carpeta
 func u(_ s: String) -> ParsedFilename { FilenameParser.parse(url: URL(fileURLWithPath: s)) }
 r = u("/tv/Mi Serie (2018)/Season 2/03.mkv"); check(r.title, "Mi Serie", "carpeta title"); check(r.season, 2, "carpeta s"); check(r.episode, 3, "carpeta e"); check(r.year, 2018, "carpeta year")
