@@ -49,6 +49,11 @@ enum FilenameParser {
         pattern: #"(?<![A-Za-z0-9])(?:disco|disc|disk|dvd|bd)[ ]?\d{1,2}(?![A-Za-z0-9])"#, options: [.caseInsensitive])
     private static let extrasMarker = try! NSRegularExpression(
         pattern: #"(?<![A-Za-z0-9])extras?(?![A-Za-z0-9])"#, options: [.caseInsensitive])
+    /// "Cap 34", "Capítulo 5": numeración corrida sin temporada.
+    private static let capNumber = try! NSRegularExpression(
+        pattern: #"(?<![A-Za-z0-9])(?:ca[po]|cap[ií]tulo|episodio)\.?[ ]?(\d{1,3})(?!\d)"#, options: [.caseInsensitive])
+    private static let seriesSuffix = try! NSRegularExpression(
+        pattern: #"[\(\[]?\s*(?:serie|series)\b.*$"#, options: [.caseInsensitive])
     private static let yearRegex = try! NSRegularExpression(
         pattern: #"(?<![0-9])(19\d{2}|20\d{2})(?![0-9])"#)
     private static let seasonFolder = try! NSRegularExpression(
@@ -82,6 +87,17 @@ enum FilenameParser {
         }
 
         var parsed = parseName(base)
+
+        // "12 Cap 13 Serie.mp4": el título del nombre es poco fiable (números previos,
+        // erratas, "La Serie"), así que manda la carpeta que contiene la serie.
+        if parsed.kind == .episode, parsed.season == nil, parsed.episode != nil {
+            let folder = parseName(withoutSeriesSuffix(parent))
+            if !folder.title.isEmpty, seasonNumber(inFolder: parent) == nil {
+                parsed.title = folder.title
+                parsed.year = parsed.year ?? folder.year
+                return parsed
+            }
+        }
         guard parsed.title.isEmpty || isJunkOnly(parsed.title) else { return parsed }
 
         // Sin título en el nombre: se toma de la carpeta (saltando "Season N").
@@ -131,6 +147,10 @@ enum FilenameParser {
             episode = intGroup(m, 2, in: text)
             kind = .episode
             episodeStart = r.lowerBound
+        } else if let m = capNumber.firstMatch(in: text, range: full) {
+            // Sin temporada: el número es corrido y se reparte al conocer la serie.
+            episode = intGroup(m, 1, in: text)
+            kind = .episode
         } else if let m = discTitle.firstMatch(in: text, range: full),
                   discMarker.firstMatch(in: text, range: full) != nil {
             // Sin SxxEyy: el número de título del disco hace de episodio (temporada 1;
@@ -177,6 +197,16 @@ enum FilenameParser {
 
     // MARK: - Helpers
 
+    /// Capítulo corrido → (temporada, episodio) según el tamaño de cada temporada.
+    static func split(absolute: Int, lengths: [(season: Int, count: Int)]) -> (Int, Int)? {
+        var remaining = absolute
+        for (season, count) in lengths {
+            if remaining <= count { return remaining > 0 ? (season, remaining) : nil }
+            remaining -= count
+        }
+        return nil
+    }
+
     private static func cleanUpTitle(_ raw: String) -> String {
         var result = raw
         // Quita bloques entre paréntesis/corchetes/llaves.
@@ -200,6 +230,11 @@ enum FilenameParser {
             if text[i] != " " { return i }
         }
         return nil
+    }
+
+    /// "Mi Serie (Serie 1996-1998)" → "Mi Serie".
+    private static func withoutSeriesSuffix(_ name: String) -> String {
+        seriesSuffix.stringByReplacingMatches(in: name, range: NSRange(name.startIndex..., in: name), withTemplate: "")
     }
 
     private static func seasonNumber(inFolder name: String) -> Int? {

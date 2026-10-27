@@ -42,12 +42,23 @@ check(r.season, 0, "extras s"); check(r.episode, 2, "extras e")
 r = p("Peli (2000) [DISCO 1]_T01.mkv"); check(r.kind, .episode, "marcador disco")
 r = p("Peli (2000) 1080p_T01.mkv"); check(r.kind, .movie, "T01 sin disco no es episodio")
 
+r = u("/d/Todos Los Hombres Sois Iguales (Serie 1996-1998)/33 Cap 34 Todos Los Hombres Sois Iguales La Serie.mp4")
+check(r.title, "Todos Los Hombres Sois Iguales", "cap title de carpeta"); check(r.episode, 34, "cap e"); check(r.season, nil, "cap sin temporada"); check(r.kind, .episode, "cap kind")
+r = u("/d/Serie X/51 Serie ꞉ Todos Los Honbres Sois Iguales Cap 47.mp4"); check(r.episode, 47, "cap al final")
+r = p("Show Cao 33 x.mp4"); check(r.episode, 33, "errata Cao")
+
 // Contexto de carpeta
 func u(_ s: String) -> ParsedFilename { FilenameParser.parse(url: URL(fileURLWithPath: s)) }
 r = u("/tv/Mi Serie (2018)/Season 2/03.mkv"); check(r.title, "Mi Serie", "carpeta title"); check(r.season, 2, "carpeta s"); check(r.episode, 3, "carpeta e"); check(r.year, 2018, "carpeta year")
 r = u("/tv/Otra Serie/Temporada 1/S01E04.mkv"); check(r.title, "Otra Serie", "carpeta 2")
 r = u("/movies/Peli Genial (2001)/video.mkv"); check(r.title, "video", "nombre con título gana")
 r = u("/movies/Peli Genial (2001)/1080p.mkv"); check(r.title, "Peli Genial", "título de carpeta"); check(r.year, 2001, "año de carpeta")
+
+let lens = [(season: 1, count: 12), (season: 2, count: 10), (season: 3, count: 15)]
+check(FilenameParser.split(absolute: 12, lengths: lens)! == (1, 12), true, "split fin s1")
+check(FilenameParser.split(absolute: 13, lengths: lens)! == (2, 1), true, "split ini s2")
+check(FilenameParser.split(absolute: 37, lengths: lens)! == (3, 15), true, "split fin")
+check(FilenameParser.split(absolute: 38, lengths: lens) == nil, true, "split fuera")
 
 // Builder
 func b(_ kind: MediaKind, _ t: String, y: Int? = nil, s: Int? = nil, e: Int? = nil, end: Int? = nil, et: String? = nil, ext: String = "mkv") -> String {

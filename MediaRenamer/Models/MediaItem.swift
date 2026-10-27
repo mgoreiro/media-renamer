@@ -36,6 +36,8 @@ final class MediaItem: Identifiable, ObservableObject {
     @Published var season: Int?
     @Published var episode: Int?
     @Published var episodeEnd: Int?
+    /// Número de capítulo corrido (sin temporada en el nombre); se reparte entre temporadas al elegir la serie.
+    var absoluteEpisode: Int?
     @Published var kind: MediaKind
 
     // Resultado de la búsqueda en TMDb
@@ -61,6 +63,7 @@ final class MediaItem: Identifiable, ObservableObject {
         self.episode = parsed.episode
         self.episodeEnd = parsed.episodeEnd
         self.kind = parsed.kind
+        if parsed.kind == .episode, parsed.season == nil { self.absoluteEpisode = parsed.episode }
     }
 
     var fileExtension: String {

@@ -174,6 +174,17 @@ final class RenameEngine {
         if manual, candidate.kind != .unknown, candidate.kind != item.kind {
             item.kind = candidate.kind
         }
+        if item.kind == .episode, let absolute = item.absoluteEpisode {
+            if let lengths = try? await client.seasonLengths(tvID: candidate.id),
+               let (season, episode) = FilenameParser.split(absolute: absolute, lengths: lengths) {
+                item.season = season
+                item.episode = episode
+            } else {
+                item.season = nil
+                item.episode = absolute
+                item.warning = "No se pudo asignar el capítulo \(absolute) a una temporada."
+            }
+        }
         if item.kind == .episode, item.season == nil || item.episode == nil {
             item.warning = "No se detectó temporada/episodio en el nombre del archivo."
         }
