@@ -114,6 +114,15 @@ struct TMDbClient {
         return titles
     }
 
+    /// Nº de episodios de cada temporada normal (sin especiales), en orden.
+    func seasonLengths(tvID: Int) async throws -> [(season: Int, count: Int)] {
+        let response: TMDbTVDetailResponse = try await fetch(
+            path: "tv/\(tvID)", queryItems: [URLQueryItem(name: "language", value: language)])
+        return response.seasons.filter { $0.seasonNumber > 0 }
+            .sorted { $0.seasonNumber < $1.seasonNumber }
+            .map { ($0.seasonNumber, $0.episodeCount) }
+    }
+
     /// Elimina diacríticos del título antes de enviarlo a TMDb para que caracteres
     /// especiales no penalicen la búsqueda.
     private func normalizedQuery(_ title: String) -> String {

@@ -66,6 +66,15 @@ struct TMDbTVResult: Decodable {
     }
 }
 
+/// Detalle de serie: sirve para repartir una numeración absoluta entre temporadas.
+struct TMDbTVDetailResponse: Decodable {
+    struct Season: Decodable {
+        let seasonNumber: Int
+        let episodeCount: Int
+    }
+    let seasons: [Season]
+}
+
 /// Temporada completa: una sola petición da el título de todos sus episodios.
 struct TMDbSeasonResponse: Decodable {
     struct Episode: Decodable {
