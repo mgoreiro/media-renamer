@@ -38,6 +38,15 @@ Descarga el `.dmg` desde [Releases](https://github.com/mgoreiro/media-renamer/re
 
 Para series, elegir la coincidencia de un episodio se **propaga** al resto de episodios de la misma serie (mismo título parseado).
 
+En la búsqueda manual también puedes **pegar un enlace de TMDb** (película o serie). El enlace manda sobre el tipo detectado en el nombre del archivo, y la app avisa si falta la temporada o el episodio.
+
+### Nombres que necesitan un empujón
+
+Además de las formas habituales con `S01E02`, el analizador entiende:
+
+- **Rips de disco:** los ficheros sin `SxxEyy` pero con un marcador de disco y un sufijo `_Tnn` (por ejemplo `Serie (1973) [DISCO 1]…_T03.m4v`) se tratan como episodios (temporada 1, o 0 si son extras) en vez de películas.
+- **Capítulos con numeración corrida:** `Cap 34` o `Capítulo 5`, sin temporada en el nombre, se trata como un episodio absoluto. El título sale de la carpeta y, al elegir la serie, el número se convierte en temporada y episodio según el tamaño de cada temporada en TMDb.
+
 ## Arquitectura
 
 ```
