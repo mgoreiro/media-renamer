@@ -1,120 +1,131 @@
 # MediaRenamer
 
-App nativa de macOS (SwiftUI) que renombra películas y episodios de series siguiendo la convención de **Plex / Jellyfin**, usando [TMDb](https://www.themoviedb.org/) para obtener el título oficial, el año y el título de cada episodio.
+[Español](README.es.md)
 
-Arrastras ficheros o carpetas, la app interpreta el nombre, busca en TMDb, propone un nombre nuevo y, tras tu confirmación, renombra **en el mismo directorio** (no mueve ni organiza en subcarpetas).
+A native macOS app (SwiftUI) that renames movies and TV episodes following the **Plex / Jellyfin** convention, using [TMDb](https://www.themoviedb.org/) to get the official title, the year and the title of every episode.
 
-## Resultado del renombrado
+You drag in files or folders, the app reads the name, looks it up on TMDb, proposes a new name and, after you confirm, renames **in the same directory** (it does not move files or organise them into subfolders).
 
-| Tipo | Antes | Después |
+## What the result looks like
+
+| Kind | Before | After |
 |---|---|---|
-| Película | `The.Matrix.1999.1080p.BluRay.x264.mkv` | `The Matrix (1999).mkv` |
-| Episodio | `breaking.bad.s01e02.720p.hdtv.mkv` | `Breaking Bad - S01E02 - Cat's in the Bag....mkv` |
+| Movie | `The.Matrix.1999.1080p.BluRay.x264.mkv` | `The Matrix (1999).mkv` |
+| Episode | `breaking.bad.s01e02.720p.hdtv.mkv` | `Breaking Bad - S01E02 - Cat's in the Bag....mkv` |
 
-Los títulos se piden a TMDb en el idioma configurado (por defecto español, `es-ES`). Los subtítulos asociados (`.srt`, `.ass`…) se renombran con el vídeo.
+Titles are requested from TMDb in the configured language (Spanish, `es-ES`, by default). Associated subtitles (`.srt`, `.ass`…) are renamed along with the video.
 
-## Instalación
+## Install
 
-Descarga el `.dmg` desde [Releases](https://github.com/mgoreiro/media-renamer/releases), arrastra la app a *Aplicaciones* y, la primera vez, ábrela con clic derecho → *Abrir* (está firmada ad-hoc, sin Developer ID).
+Download the `.dmg` from [Releases](https://github.com/mgoreiro/media-renamer/releases), drag the app to *Applications* and, the first time, open it with right-click → *Open* (it is ad-hoc signed, without a Developer ID).
 
-## Requisitos
+## Requirements
 
-- macOS 13 o superior (`LSMinimumSystemVersion`).
-- Xcode para compilar (proyecto `MediaRenamer.xcodeproj`, sin dependencias externas).
-- Una API key **v3** gratuita de TMDb: <https://www.themoviedb.org/settings/api>.
+- macOS 13 or later (`LSMinimumSystemVersion`).
+- Xcode to build it (project `MediaRenamer.xcodeproj`, no external dependencies).
+- A free **v3** TMDb API key: <https://www.themoviedb.org/settings/api>.
 
-## Uso
+## Usage
 
-1. Abre el proyecto en Xcode y ejecuta (⌘R).
-2. Ajustes (⌘,) → pega tu API key v3 o tu token v4 de TMDb (se guarda en el Llavero) y elige idioma.
-3. Arrastra ficheros o carpetas a la zona de drop, o usa **Abrir…** (⌘O). Extensiones: `mkv mp4 avi mov m4v wmv ts m2ts mpg mpeg flv webm`; las carpetas se recorren recursivamente (sin ocultos).
-4. **Buscar coincidencias** (⌘R; se puede cancelar y se reintentan los fallos). Cada fila queda en uno de estos estados:
-   - ✅ *autoMatched*: un único resultado, o uno solo con título exacto (y año compatible). Listo para renombrar.
-   - ❓ *needsSelection*: varias coincidencias; pulsa **Elegir…** y selecciona (o busca a mano).
-   - ⚠️ *noResults* / *error*: sin resultados o fallo de red.
-5. **Renombrar todos** (⌘↩) renombra únicamente los items en estado ✅ (y sus subtítulos). Pasan a 🔵 *renamed* y se puede **Deshacer renombrado**. Si dos ficheros del lote acabarían con el mismo nombre, no se renombra ninguno de ellos.
+1. Open the project in Xcode and run it (⌘R).
+2. Settings (⌘,) → paste your TMDb v3 API key or v4 token (it is stored in the Keychain) and choose a language.
+3. Drag files or folders onto the drop zone, or use **Open…** (⌘O). Extensions: `mkv mp4 avi mov m4v wmv ts m2ts mpg mpeg flv webm`; folders are walked recursively (hidden files are skipped).
+4. **Find matches** (⌘R; it can be cancelled, and failures are retried). Each row ends up in one of these states:
+   - ✅ *autoMatched*: a single result, or only one with an exact title (and a compatible year). Ready to rename.
+   - ❓ *needsSelection*: several matches; press **Choose…** and pick one (or search by hand).
+   - ⚠️ *noResults* / *error*: no results or a network failure.
+5. **Rename all** (⌘↩) renames only the items in the ✅ state (and their subtitles). They become 🔵 *renamed* and you can **Undo rename**. If two files in the batch would end up with the same name, none of them is renamed.
 
-Para series, elegir la coincidencia de un episodio se **propaga** al resto de episodios de la misma serie (mismo título parseado).
+For series, choosing the match of one episode is **propagated** to the rest of the episodes of the same series (same parsed title).
 
-## Arquitectura
+In the manual search you can also **paste a TMDb link** (a movie or a series). The link takes priority over the kind detected from the file name, and the app warns you if the season or episode is missing.
+
+### Names that need a little help
+
+Besides the usual `S01E02` forms, the parser understands:
+
+- **Disc rips:** files with no `SxxEyy` but with a disc marker and a `_Tnn` suffix (for example `Serie (1973) [DISC 1]…_T03.m4v`) are treated as episodes (season 1, or 0 for extras) instead of movies.
+- **Running episode numbers:** `Cap 34` or `Capítulo 5`, with no season in the name, is treated as an absolute episode number. The title comes from the folder and, when you choose the series, the number is turned into a season and episode using the size of each season on TMDb.
+
+## Architecture
 
 ```
 MediaRenamer/
-├── MediaRenamerApp.swift      Punto de entrada: WindowGroup + escena Settings
-├── ContentView.swift          Pantalla principal, toolbar, sheet de selección
+├── MediaRenamerApp.swift      Entry point: WindowGroup + Settings scene
+├── ContentView.swift          Main screen, toolbar, selection sheet
 ├── Models/
-│   ├── MediaItem.swift        ObservableObject por fichero + enums MediaKind / MatchStatus
-│   ├── AppSettings.swift      API key (Llavero) e idioma
-│   ├── LibraryModel.swift     Colección de MediaItem; reenvía objectWillChange de cada item
-│   └── TMDbModels.swift       TMDbCandidate (modelo unificado) + DTOs Decodable de la API
+│   ├── MediaItem.swift        ObservableObject per file + MediaKind / MatchStatus enums
+│   ├── AppSettings.swift      API key (Keychain) and language
+│   ├── LibraryModel.swift     Collection of MediaItem; forwards each item's objectWillChange
+│   └── TMDbModels.swift       TMDbCandidate (unified model) + Decodable DTOs of the API
 ├── Services/
-│   ├── FilenameParser.swift   Nombre (+ carpetas) → título / año / temporada / episodio(s)
-│   ├── FilenameBuilder.swift  Nombre final Plex/Jellyfin y saneado (puro)
-│   ├── FileRenamer.swift      Plan/ejecución/rollback de renombrados en disco + escáner de carpetas
-│   ├── KeychainStore.swift    Acceso al Llavero
-│   ├── TMDbClient.swift       Cliente HTTP (search/movie, search/tv, tv/{id}/season/{n}) con reintentos y caché
-│   └── RenameEngine.swift     Orquestación: búsqueda en paralelo, auto-match, propagación, renombrar/deshacer
+│   ├── FilenameParser.swift   Name (+ folders) → title / year / season / episode(s)
+│   ├── FilenameBuilder.swift  Final Plex/Jellyfin name and sanitising (pure)
+│   ├── FileRenamer.swift      Plan/execute/rollback of renames on disk + folder scanner
+│   ├── KeychainStore.swift    Keychain access
+│   ├── TMDbClient.swift       HTTP client (search/movie, search/tv, tv/{id}/season/{n}) with retries and cache
+│   └── RenameEngine.swift     Orchestration: parallel search, auto-match, propagation, rename/undo
 └── Views/
-    ├── DropZoneView.swift     Drag & drop y expansión de carpetas
-    ├── FileRowView.swift      Fila: nombre original, propuesto, estado
-    ├── MatchPickerSheet.swift Selector de coincidencia + búsqueda manual
+    ├── DropZoneView.swift     Drag & drop and folder expansion
+    ├── FileRowView.swift      Row: original name, proposed name, status
+    ├── MatchPickerSheet.swift Match picker + manual search
     └── SettingsView.swift     API key
 ```
 
-### Flujo de datos
+### Data flow
 
 ```
-Drop / Abrir… → MediaFileScanner.expand → LibraryModel.add
+Drop / Open… → MediaFileScanner.expand → LibraryModel.add
         └─ FilenameParser.parse(url:) → MediaItem(status: .pending)
-Buscar → RenameEngine.searchAll   (≤4 en paralelo, cancelable)
-        ├─ películas: search() por fichero (reintenta sin año si no hay resultados)
-        └─ series: 1 búsqueda por serie y se reutiliza
-              └─ select(candidate) → títulos de la temporada (1 petición, cacheada) → proposedFilename → .autoMatched
-Renombrar → RenameEngine.renameAll → FileRenamer.plan (vídeo + subtítulos) → perform (con rollback)
-Deshacer  → RenameEngine.undoAll   → FileRenamer.reversed
+Find → RenameEngine.searchAll   (≤4 in parallel, cancellable)
+        ├─ movies: search() per file (retries without the year if there are no results)
+        └─ series: 1 search per series, reused
+              └─ select(candidate) → season titles (1 request, cached) → proposedFilename → .autoMatched
+Rename → RenameEngine.renameAll → FileRenamer.plan (video + subtitles) → perform (with rollback)
+Undo   → RenameEngine.undoAll   → FileRenamer.reversed
 ```
 
 ### FilenameParser
 
-Normaliza `.` y `_` y detecta, por este orden: `S01E02` (con multi-episodio `S01E01E02`/`S01E01-E03`), `1x02` y `Season 1 Episode 2`/`Temporada 1 Episodio 2`. El año preferido es el que va entre paréntesis/corchetes o, si no, el último que tenga un título delante (y antes del marcador de episodio). El título es lo anterior al primer marcador (episodio, año o etiqueta de release como palabra completa). Si el nombre no da título (`S01E03.mkv`, `03.mkv`), se usan las carpetas (`Serie/Temporada 2/03.mkv`).
+It normalises `.` and `_` and detects, in this order: `S01E02` (with multi-episode `S01E01E02` / `S01E01-E03`), `1x02` and `Season 1 Episode 2` / `Temporada 1 Episodio 2`. The preferred year is the one in parentheses or brackets or, failing that, the last one that has a title before it (and before the episode marker). The title is whatever comes before the first marker (episode, year or release tag as a whole word). If the name gives no title (`S01E03.mkv`, `03.mkv`), the folders are used (`Series/Season 2/03.mkv`).
 
 ### Auto-match
 
-Se acepta automáticamente si TMDb devuelve 1 resultado, o si exactamente 1 coincide —por título localizado **u original**, normalizados sin diacríticos— y año compatible. Si con año no hay resultados se reintenta sin año.
+It is accepted automatically if TMDb returns 1 result, or if exactly 1 matches, by localised **or original** title (normalised without diacritics) and a compatible year. If there are no results with the year, it retries without it.
 
-### Nombre final
+### Final name
 
-- Película: `Título (Año).ext`
-- Episodio: `Serie - SxxEyy - Título del episodio.ext` (`SxxEyy-Ezz` si es multi-episodio; sin título si TMDb no lo devuelve, con aviso)
-- Saneado: `:` → ` -`, `/ \` → `-`, `"` → `'`, se eliminan `* ? < > |`, sin puntos/espacios finales y máx. 255 bytes.
+- Movie: `Title (Year).ext`
+- Episode: `Series - SxxEyy - Episode title.ext` (`SxxEyy-Ezz` for multi-episode; no title if TMDb does not return one, with a warning)
+- Sanitising: `:` → ` -`, `/ \` → `-`, `"` → `'`, `* ? < > |` are removed, no trailing dots or spaces, 255 bytes at most.
 
-## Decisiones de diseño a tener en cuenta
+## Design decisions worth knowing
 
-- **Sin App Sandbox** (`MediaRenamer.entitlements`): renombrar un fichero soltado requiere escribir en su carpeta padre, algo que el sandbox no concede sólo por el drag & drop. Sí tiene `network.client` y *Hardened Runtime*.
-- **API key** en el Llavero; se acepta la v3 (query `api_key`) o el token v4 (cabecera `Bearer`, recomendado).
-- Todo el texto de la UI está en español (sin `Localizable.xcstrings` todavía).
+- **No App Sandbox** (`MediaRenamer.entitlements`): renaming a dropped file requires writing to its parent folder, which the sandbox does not grant just because of the drag and drop. It does have `network.client` and the *Hardened Runtime*.
+- **API key** in the Keychain; the v3 key (`api_key` query) or the v4 token (`Bearer` header, recommended) is accepted.
+- All the UI text is in Spanish for now (no `Localizable.xcstrings` yet).
 
-## Desarrollo
+## Development
 
 ```bash
-# Pruebas de la lógica pura (parser, builder, renombrador), sin XCTest
+# Tests of the pure logic (parser, builder, renamer), without XCTest
 Tests/run-tests.sh
 
-# Prueba de extremo a extremo con una carpeta de series y un TMDb simulado (sin red ni Llavero)
+# End-to-end test with a folder of series and a simulated TMDb (no network or Keychain)
 Tests/e2e/run-e2e.sh
 
-# Genera dist/MediaRenamer-<versión>.dmg (universal arm64 + x86_64)
+# Builds dist/MediaRenamer-<version>.dmg (universal arm64 + x86_64)
 scripts/build-dmg.sh
 ```
 
-Cambios por versión: [CHANGELOG.md](CHANGELOG.md).
+Changes by version: [CHANGELOG.md](CHANGELOG.md).
 
-## Licencia
+## License
 
-GPL-3.0 — ver [LICENSE](LICENSE).
+GPL-3.0, see [LICENSE](LICENSE).
 
-Este producto usa la API de TMDb pero no está avalado ni certificado por TMDb.
+This product uses the TMDb API but is not endorsed or certified by TMDb.
 
 ---
 
-Revisión de calidad y mejoras (estado tras la 1.1): [docs/MEJORAS.md](docs/MEJORAS.md).
+Quality review and improvements (state after 1.1): [docs/MEJORAS.md](docs/MEJORAS.md) (in Spanish).
