@@ -1,5 +1,15 @@
 # Changelog
 
+## 1.2 — 2026-11-18
+
+### Novedades
+- **Pegar un enlace de TMDb** en la búsqueda manual (película o serie). El enlace manda sobre el tipo detectado en el nombre del archivo y la app avisa si falta la temporada o el episodio.
+- **Rips de disco:** los ficheros sin `SxxEyy` pero con un marcador de disco y sufijo `_Tnn` (`Serie (1973) [DISCO 1]…_T03.m4v`) se tratan como episodios (temporada 1, o 0 si son extras) en vez de películas.
+- **Capítulos con numeración corrida:** `Cap 34` o `Capítulo 5`, sin temporada en el nombre, se trata como episodio absoluto; el título sale de la carpeta y, al elegir la serie, el número se convierte en temporada y episodio según el tamaño de cada temporada en TMDb.
+
+### Desarrollo
+- Prueba de extremo a extremo con una carpeta de series y un TMDb simulado (`Tests/e2e/run-e2e.sh`), sin red ni Llavero.
+
 ## 1.1 — 2026-10-07
 
 ### Correcciones
