@@ -6,6 +6,8 @@ A native macOS app (SwiftUI) that renames movies and TV episodes following the *
 
 You drag in files or folders, the app reads the name, looks it up on TMDb, proposes a new name and, after you confirm, renames **in the same directory** (it does not move files or organise them into subfolders).
 
+![MediaRenamer with seven files and their proposed Plex/Jellyfin names](https://raw.githubusercontent.com/mgoreiro/media-renamer/main/docs/screenshot.png)
+
 ## What the result looks like
 
 | Kind | Before | After |
