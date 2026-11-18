@@ -6,6 +6,8 @@ App nativa de macOS (SwiftUI) que renombra películas y episodios de series sigu
 
 Arrastras ficheros o carpetas, la app interpreta el nombre, busca en TMDb, propone un nombre nuevo y, tras tu confirmación, renombra **en el mismo directorio** (no mueve ni organiza en subcarpetas).
 
+![MediaRenamer con siete ficheros y los nombres propuestos para Plex/Jellyfin](https://raw.githubusercontent.com/mgoreiro/media-renamer/main/docs/screenshot.png)
+
 ## Resultado del renombrado
 
 | Tipo | Antes | Después |
